@@ -12,7 +12,7 @@ defineProps<{
     <div class="hero-logo">
       <img :src="logo" alt="Sea Lantern" width="72" height="72" />
     </div>
-    <h1 class="hero-title">Sea Lantern</h1>
+    <h1 class="hero-title">Sea Lantern Tiny</h1>
     <p class="hero-subtitle">{{ i18n.t("about.subtitle") }}</p>
     <div class="hero-badges">
       <span class="version-badge">v{{ version }}</span>

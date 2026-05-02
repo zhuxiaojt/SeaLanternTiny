@@ -37,7 +37,7 @@
 
 **自动生成文件**（运行命令后自动更新）：
 
-- `Cargo.lock` - 运行 `cargo update -p sea-lantern` 自动更新
+- `Cargo.lock` - 运行 `cargo update -p sea-lantern-tiny` 自动更新
 - `package-lock.json` - 运行 `npm install` 自动更新
 
 **版本号读取方式**：
@@ -288,7 +288,7 @@ export async function getSystemInfo(): Promise<SystemInfo> {
 
 ```bash
 # 更新 Cargo.lock
-cargo update -p sea-lantern
+cargo update -p sea-lantern-tiny
 
 # 更新 package-lock.json
 npm install
@@ -301,7 +301,7 @@ npm install
 
 # 2. 更新依赖锁定文件
 cd src-tauri
-cargo update -p sea-lantern
+cargo update -p sea-lantern-tiny
 cd ..
 npm install
 

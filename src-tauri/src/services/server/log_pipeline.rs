@@ -152,20 +152,6 @@ pub fn get_logs(server_id: &str, since: usize, recent_limit: Option<usize>) -> V
         .unwrap_or_default()
 }
 
-pub fn get_all_logs() -> Vec<(String, Vec<String>)> {
-    let server_ids = crate::services::global::server_manager()
-        .get_server_list()
-        .into_iter()
-        .map(|server| server.id)
-        .collect::<Vec<String>>();
-
-    let mut result = Vec::with_capacity(server_ids.len());
-    for server_id in server_ids {
-        result.push((server_id.clone(), get_logs(&server_id, 0, None)));
-    }
-    result
-}
-
 fn log_writers() -> &'static Mutex<HashMap<String, ServerLogWriter>> {
     LOG_WRITERS.get_or_init(|| Mutex::new(HashMap::new()))
 }
@@ -398,7 +384,6 @@ where
 
                     if line.contains("Done (") && line.contains(")! For help") {
                         crate::services::global::server_manager().clear_starting(&server_id);
-                        let _ = crate::plugins::api::emit_server_ready(&server_id);
                     }
                 }
                 Err(_) => break,
@@ -411,16 +396,6 @@ fn emit_server_log_line(server_id: &str, line: &str) {
     let processed_line = process_log_line(server_id, line);
     if let Some(handler) = SERVER_LOG_EVENT_HANDLER.get() {
         let _ = handler(server_id, &processed_line);
-    }
-
-    // HTTP/Docker 模式：通过 SSE 广播日志
-    #[cfg(feature = "docker")]
-    {
-        let event = crate::services::http::http_server::LogEvent {
-            server_id: server_id.to_string(),
-            line: processed_line.clone(),
-        };
-        let _ = crate::services::http::http_server::get_log_sender().send(event);
     }
 }
 

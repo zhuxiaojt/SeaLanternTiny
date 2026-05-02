@@ -8,7 +8,6 @@ Sea Lantern（海晶灯）是一个基于 Tauri 2、Rust 与 Vue 3 的 Minecraft
 
 ```text
 sea-lantern/
-├── .example_plugin/              # 示例插件目录，用于参考 manifest、脚本与资源组织方式
 ├── .github/                      # GitHub Issue、PR 模板与 CI 工作流
 ├── .husky/                       # Git Hook 配置
 ├── .vscode/                      # VS Code 工作区设置

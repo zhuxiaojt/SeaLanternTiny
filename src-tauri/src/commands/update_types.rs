@@ -67,8 +67,8 @@ impl RepoConfig {
 #[allow(dead_code)]
 pub fn get_github_config() -> RepoConfig {
     RepoConfig {
-        owner: "SeaLantern-Studio",
-        repo: "SeaLantern",
+        owner: "zhuxiaojt",
+        repo: "SeaLanternTiny",
         api_base: "https://api.github.com/repos",
     }
 }

@@ -166,7 +166,7 @@ mod tests {
 
     #[test]
     fn normalize_release_tag_version_handles_prefixed_tag() {
-        assert_eq!(normalize_release_tag_version("sea-lantern-v0.5.0"), "0.5.0");
+        assert_eq!(normalize_release_tag_version("sea-lantern-tiny-v0.5.0"), "0.5.0");
     }
 
     #[test]

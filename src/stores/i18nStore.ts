@@ -3,7 +3,6 @@ import { defineStore } from "pinia";
 import { i18n, type LocaleCode, setTranslations } from "@language";
 import { settingsApi } from "@api/settings";
 import { fetchLocale } from "@api/remoteLocales";
-import { onLocaleChanged } from "@api/plugin";
 
 const LOCALE_LABEL_KEYS: Record<string, string> = {
   "zh-CN": "header.chinese",
@@ -45,18 +44,12 @@ export const useI18nStore = defineStore("i18n", () => {
       } catch (error) {
         console.error("Failed to save language setting:", error);
       }
-      try {
-        await onLocaleChanged(nextLocale);
-      } catch (error) {
-        console.error("Failed to notify backend about locale change:", error);
-      }
     }
   }
 
   async function downloadLocale(localeCode: string) {
     if (!i18n.isSupportedLocale(localeCode)) return;
     try {
-      // 直接从本地加载语言文件
       let data: any = null;
       data = await fetchLocale(localeCode as LocaleCode);
       setTranslations(localeCode as any, data as any);

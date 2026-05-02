@@ -1540,12 +1540,6 @@ impl ServerManager {
         Ok(())
     }
 
-    pub fn get_running_server_ids(&self) -> Vec<String> {
-        self.lock_processes()
-            .map(|procs| procs.keys().cloned().collect())
-            .unwrap_or_default()
-    }
-
     pub fn update_server_name(&self, id: &str, new_name: &str) -> Result<(), String> {
         let validated_name = validate_server_name(new_name)?;
         let mut servers = self.lock_servers()?;

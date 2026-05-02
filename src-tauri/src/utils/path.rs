@@ -23,7 +23,7 @@ fn is_msi_installation() -> bool {
 /// - Windows MSI 安装：%AppData%\Sea Lantern
 /// - Windows 便携版：程序所在目录
 /// - macOS: ~/Library/Application Support/Sea Lantern
-/// - Linux: ~/.local/share/sea-lantern
+/// - Linux: ~/.local/share/sea-lantern-tiny
 ///
 /// 这个函数确保 MSI 安装的应用将数据存储在用户目录而非安装目录
 pub fn get_app_data_dir() -> PathBuf {
@@ -53,9 +53,9 @@ pub fn get_app_data_dir() -> PathBuf {
             if let Some(home_dir) = dirs_next::home_dir() {
                 eprintln!(
                     "[DEBUG] path.rs: Windows fallback to home, returning path: {:?}",
-                    home_dir.join(".sea-lantern")
+                    home_dir.join(".sea-lantern-tiny")
                 );
-                return home_dir.join(".sea-lantern");
+                return home_dir.join(".sea-lantern-tiny");
             }
         }
 
@@ -71,9 +71,9 @@ pub fn get_app_data_dir() -> PathBuf {
         if let Some(home_dir) = dirs_next::home_dir() {
             eprintln!(
                 "[DEBUG] path.rs: Windows final fallback, returning path: {:?}",
-                home_dir.join(".sea-lantern")
+                home_dir.join(".sea-lantern-tiny")
             );
-            return home_dir.join(".sea-lantern");
+            return home_dir.join(".sea-lantern-tiny");
         }
         eprintln!("[DEBUG] path.rs: Windows ultimate fallback, returning path: .");
         PathBuf::from(".")
@@ -108,20 +108,20 @@ pub fn get_app_data_dir() -> PathBuf {
 
     #[cfg(target_os = "linux")]
     {
-        // Linux: ~/.local/share/sea-lantern
+        // Linux: ~/.local/share/sea-lantern-tiny
         if let Some(data_dir) = dirs_next::data_dir() {
             eprintln!(
                 "[DEBUG] path.rs: Linux mode, returning path: {:?}",
-                data_dir.join("sea-lantern")
+                data_dir.join("sea-lantern-tiny")
             );
-            return data_dir.join("sea-lantern");
+            return data_dir.join("sea-lantern-tiny");
         }
         if let Some(home_dir) = dirs_next::home_dir() {
             eprintln!(
                 "[DEBUG] path.rs: Linux fallback, returning path: {:?}",
-                home_dir.join(".sea-lantern")
+                home_dir.join(".sea-lantern-tiny")
             );
-            return home_dir.join(".sea-lantern");
+            return home_dir.join(".sea-lantern-tiny");
         }
         eprintln!("[DEBUG] path.rs: Linux ultimate fallback, returning path: .");
         PathBuf::from(".")

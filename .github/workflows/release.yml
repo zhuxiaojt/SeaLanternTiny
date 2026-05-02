@@ -3,8 +3,8 @@ name: "发布"
 on:
   push:
     tags:
-      - "v*"
-      - "sea-lantern-v*"
+      - "tiny-v*"
+      - "sea-lantern-tiny-v*"
 
 permissions:
   contents: write
@@ -118,9 +118,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tagName: ${{ needs.validate-tag.outputs.tag }}
-          releaseName: "Sea Lantern v${{ needs.validate-tag.outputs.version }}"
+          releaseName: "Sea Lantern Tiny v${{ needs.validate-tag.outputs.version }}"
           releaseBody: |
-            ## 发布 Sea Lantern v${{ needs.validate-tag.outputs.version }}
+            ## 发布 Sea Lantern Tiny v${{ needs.validate-tag.outputs.version }}
 
             自动发布构建产物。
           releaseDraft: true

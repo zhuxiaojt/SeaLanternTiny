@@ -10,7 +10,6 @@ import ResetConfirmModal from "@components/views/paint/ResetConfirmModal.vue";
 import { settingsApi, getSystemFonts, type AppSettings } from "@api/settings";
 import { systemApi } from "@api/system";
 import { i18n } from "@language";
-import { usePluginStore } from "@stores/pluginStore";
 import {
   dispatchSettingsUpdate,
   SETTINGS_UPDATE_EVENT,
@@ -22,16 +21,8 @@ const loading = ref(true);
 const fontsLoading = ref(false);
 const error = ref<string | null>(null);
 
-const pluginStore = usePluginStore();
-
-const themeProxyPlugin = computed(() => {
-  return pluginStore.plugins.find(
-    (p) => p.state === "enabled" && pluginStore.hasCapability(p.manifest.id, "theme-provider"),
-  );
-});
-
-const isThemeProxied = computed(() => !!themeProxyPlugin.value);
-const themeProxyPluginName = computed(() => themeProxyPlugin.value?.manifest.name || "");
+const isThemeProxied = false;
+const themeProxyPluginName = "";
 
 const fontSize = ref("14");
 const consoleFontSize = ref("13");

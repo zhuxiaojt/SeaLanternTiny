@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from "vue-router";
-import { onPageChanged } from "@api/plugin";
 
 const routes = [
   {
@@ -33,22 +32,6 @@ const routes = [
     meta: { titleKey: "common.player_manage", icon: "users" },
   },
   {
-    path: "/tunnel",
-    name: "tunnel",
-    component: () => import("@views/TunnelView.vue"),
-    meta: { titleKey: "common.tunnel", icon: "link2" },
-  },
-  {
-    path: "/plugins",
-    name: "plugins",
-    component: () => import("@views/PluginsView.vue"),
-    meta: { titleKey: "common.plugins", icon: "puzzle" },
-  },
-  {
-    path: "/market",
-    redirect: "/plugins?tab=market",
-  },
-  {
     path: "/settings",
     name: "settings",
     component: () => import("@views/SettingsView.vue"),
@@ -67,20 +50,6 @@ const routes = [
     meta: { titleKey: "common.about", icon: "info" },
   },
   {
-    path: "/plugin/:pluginId",
-    name: "plugin-page",
-    component: () => import("@views/PluginPageView.vue"),
-    props: true,
-    meta: { titleKey: "plugins.plugin_settings", icon: "puzzle" },
-  },
-  {
-    path: "/plugin-category/:pluginId",
-    name: "plugin-category",
-    component: () => import("@views/PluginCategoryView.vue"),
-    props: true,
-    meta: { titleKey: "plugins.plugin_category", icon: "folder" },
-  },
-  {
     path: "/download",
     name: "download",
     component: () => import("../views/DownloadView.vue"),
@@ -90,26 +59,6 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
-});
-
-let pageChangedTimers: number[] = [];
-
-router.afterEach((to) => {
-  for (const t of pageChangedTimers) {
-    clearTimeout(t);
-  }
-  pageChangedTimers = [];
-
-  pageChangedTimers.push(
-    window.setTimeout(() => {
-      onPageChanged(to.path).catch(() => {});
-    }, 250),
-  );
-  pageChangedTimers.push(
-    window.setTimeout(() => {
-      onPageChanged(to.path).catch(() => {});
-    }, 900),
-  );
 });
 
 export default router;

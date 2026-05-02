@@ -1,19 +1,15 @@
 //! SeaLantern services 层入口模块。
 //!
-//! - 按领域导出子模块：`server` / `http` / `download`；
-//! - 顶层仅保留少量横切模块：`global`、`i18n`、`panic_report`、`async_loader` 等；
+//! - 按领域导出子模块：`server` / `download`；
+//! - 顶层仅保留少量横切模块：`global`、`panic_report`、`async_loader` 等；
 //! - 通过 `pub use` 为历史模块名提供别名（如 `server_manager`、`download_manager`），
 //!   以便在未来大版本中按计划移除这些别名而不影响当前调用方。
 pub mod async_loader;
 pub mod download;
 pub mod global;
-pub mod http;
-pub mod i18n;
 pub mod java_detector;
-pub(crate) mod locale_json;
 pub mod mcs_plugin_manager;
 pub mod mod_manager;
-pub mod online;
 pub mod panic_report;
 pub mod server;
 pub mod settings_manager;

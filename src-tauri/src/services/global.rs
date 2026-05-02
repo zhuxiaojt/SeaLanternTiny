@@ -1,9 +1,4 @@
-//! 全局单例访问入口：提供 server_manager / settings_manager / i18n_service 等静态句柄。
-//!
-//! 所有函数都基于 OnceLock 懒初始化，在进程生命周期内保持 `&'static` 引用。
-//! 注意：`mod_manager()` 目前仍然使用 `expect("Failed to initialize ModManager")`
-//! 在初始化失败时 panic，属于启动期失败场景，而非正常运行期的业务错误。
-use super::i18n::I18nService;
+//! 全局单例访问入口：提供 server_manager / settings_manager 等静态句柄。
 use super::join_manager::JoinManager;
 use super::mcs_plugin_manager::m_PluginManager;
 use super::mod_manager::ModManager;
@@ -22,11 +17,6 @@ pub fn server_manager() -> &'static ServerManager {
 pub fn settings_manager() -> &'static SettingsManager {
     static INSTANCE: OnceLock<SettingsManager> = OnceLock::new();
     INSTANCE.get_or_init(SettingsManager::new)
-}
-
-pub fn i18n_service() -> &'static I18nService {
-    static INSTANCE: OnceLock<I18nService> = OnceLock::new();
-    INSTANCE.get_or_init(I18nService::new)
 }
 
 #[allow(dead_code)]

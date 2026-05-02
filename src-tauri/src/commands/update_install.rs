@@ -3,8 +3,6 @@ use std::sync::atomic::{AtomicBool, Ordering};
 
 use crate::services;
 
-#[cfg(target_os = "linux")]
-use crate::commands::update_arch::{get_aur_helper, is_arch_linux};
 use crate::commands::update_types::PendingUpdate;
 use crate::commands::update_version::compare_versions;
 
@@ -16,7 +14,7 @@ pub static INSTALL_IN_PROGRESS: AtomicBool = AtomicBool::new(false);
 #[allow(dead_code)]
 pub fn get_update_cache_dir() -> PathBuf {
     let cache_dir = dirs_next::cache_dir().unwrap_or_else(std::env::temp_dir);
-    cache_dir.join("com.fpsz.sea-lantern").join("updates")
+    cache_dir.join("com.fpsz.sea-lantern-tiny").join("updates")
 }
 
 /// 获取待更新文件路径
@@ -36,22 +34,6 @@ pub async fn execute_install(file_path: String, version: String) -> Result<(), S
         let path = PathBuf::from(&file_path);
         if !path.exists() {
             return Err(format!("Update file not found: {}", file_path));
-        }
-
-        // Arch Linux 特殊处理
-        #[cfg(target_os = "linux")]
-        {
-            if is_arch_linux() {
-                let helper = get_aur_helper().unwrap_or_else(|| "yay".to_string());
-                return Err(format!(
-                    "您使用的是 Arch Linux\n\
-                     请使用包管理器更新 SeaLantern：\n\
-                     {} -S sealantern\n\
-                     \n\
-                     或使用其他 AUR 助手",
-                    helper
-                ));
-            }
         }
 
         // 根据设置决定是否在更新前关闭所有服务器

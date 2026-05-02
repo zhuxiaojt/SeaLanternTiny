@@ -3,7 +3,6 @@ import { computed, ref, nextTick, watch, onMounted, onUnmounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useUiStore } from "@stores/uiStore";
 import { useServerStore } from "@stores/serverStore";
-import { usePluginStore } from "@stores/pluginStore";
 import { i18n } from "@language";
 import SLSelect from "@components/common/SLSelect.vue";
 import {
@@ -17,12 +16,6 @@ import {
   Info,
   Server,
   ChevronLeft,
-  Blocks,
-  Store,
-  LayoutDashboard,
-  BarChart2,
-  Sparkles,
-  Link2,
   DownloadIcon,
   type LucideIcon,
 } from "lucide-vue-next";
@@ -39,12 +32,6 @@ const iconMap: Record<string, LucideIcon> = {
   paint: PaintRoller,
   info: Info,
   server: Server,
-  blocks: Blocks,
-  store: Store,
-  "layout-dashboard": LayoutDashboard,
-  chart: BarChart2,
-  sparkles: Sparkles,
-  link2: Link2,
   download: DownloadIcon,
 };
 
@@ -56,7 +43,6 @@ const router = useRouter();
 const route = useRoute();
 const ui = useUiStore();
 const serverStore = useServerStore();
-const pluginStore = usePluginStore();
 const navIndicator = ref<HTMLElement | null>(null);
 const sidebarTransitioning = ref(false);
 const isMacOS = isMacOSPlatform();
@@ -70,10 +56,6 @@ interface NavItem {
   labelKey: string;
   label: string;
   group: string;
-  isPlugin?: boolean;
-  pluginId?: string;
-  pluginIcon?: string;
-  pluginName?: string;
   after?: string;
   children?: NavItem[];
 }
@@ -101,14 +83,6 @@ const staticNavItems: NavItem[] = [
     icon: "download",
     labelKey: "common.download",
     label: i18n.t("common.download"),
-    group: "main",
-  },
-  {
-    name: "tunnel",
-    path: "/tunnel",
-    icon: "link2",
-    labelKey: "common.tunnel",
-    label: i18n.t("common.tunnel"),
     group: "main",
   },
   {
@@ -144,15 +118,6 @@ const staticNavItems: NavItem[] = [
     group: "system",
   },
   {
-    name: "plugins",
-    path: "/plugins",
-    icon: "blocks",
-    labelKey: "common.plugins",
-    label: i18n.t("common.plugins"),
-    group: "system",
-  },
-
-  {
     name: "settings",
     path: "/settings",
     icon: "settings",
@@ -162,89 +127,8 @@ const staticNavItems: NavItem[] = [
   },
 ];
 
-const pluginNavItems = computed<NavItem[]>(() => {
-  return pluginStore.navItems.map((item) => ({
-    name: `plugin-${item.plugin_id}`,
-    path: `/plugin/${item.plugin_id}`,
-    icon: item.icon || "blocks",
-    labelKey: "",
-    label: item.label,
-    group: "plugins",
-    isPlugin: true,
-    pluginId: item.plugin_id,
-    pluginIcon: pluginStore.icons[item.plugin_id] || undefined,
-  }));
-});
-
-function sidebarItemToNavItem(item: import("@type/plugin").SidebarItem): NavItem {
-  const path =
-    item.mode === "category" ? `/plugin-category/${item.pluginId}` : `/plugin/${item.pluginId}`;
-  const pluginManifest = pluginStore.plugins.find((p) => p.manifest.id === item.pluginId)?.manifest;
-  return {
-    name: `sidebar-${item.pluginId}`,
-    path,
-    icon: item.icon || "blocks",
-    labelKey: "",
-    label: item.label,
-    group: item.isDefault ? "plugins-default" : "plugins-custom",
-    isPlugin: true,
-    pluginId: item.pluginId,
-    pluginIcon: pluginStore.icons[item.pluginId] || undefined,
-    pluginName: pluginManifest?.name,
-    after: item.after,
-    children: item.children?.map(sidebarItemToNavItem),
-  };
-}
-
 const navItems = computed<NavItem[]>(() => {
-  const result: NavItem[] = [];
-
-  // 收集插件边栏项目
-  const positioned = pluginStore.sidebarItems
-    .filter((i) => !i.isDefault && i.after)
-    .map(sidebarItemToNavItem);
-
-  const unpositioned = pluginStore.sidebarItems
-    .filter((i) => !i.isDefault && !i.after)
-    .map(sidebarItemToNavItem);
-
-  const defaultItems = pluginStore.sidebarItems
-    .filter((i) => i.isDefault)
-    .map(sidebarItemToNavItem);
-
-  const handledPluginIds = new Set(pluginStore.sidebarItems.map((i) => i.pluginId));
-  const remainingPluginItems = pluginNavItems.value.filter(
-    (i) => !i.pluginId || !handledPluginIds.has(i.pluginId),
-  );
-
-  // 放在 plugins 和 settings 之间的插件项
-  const pluginItemsBetweenPluginsAndSettings = [
-    ...unpositioned,
-    ...defaultItems,
-    ...remainingPluginItems,
-  ];
-
-  // 遍历静态导航项，在 plugins 和 settings 之间插入插件边栏项目
-  for (const staticItem of staticNavItems) {
-    result.push(staticItem);
-
-    // 在 plugins 项之后插入插件边栏项目
-    if (staticItem.name === "plugins") {
-      result.push(...pluginItemsBetweenPluginsAndSettings);
-    }
-  }
-
-  // 处理有 after 定位的插件项（插入到指定位置）
-  for (const item of positioned) {
-    const targetIdx = result.findIndex((r) => r.name === item.after);
-    if (targetIdx !== -1) {
-      result.splice(targetIdx + 1, 0, item);
-    } else {
-      result.push(item);
-    }
-  }
-
-  return result;
+  return staticNavItems;
 });
 
 function navigateTo(path: string) {
@@ -259,21 +143,16 @@ function updateNavIndicator() {
     const sidebarNav = document.querySelector(".sidebar-nav");
 
     if (activeNavItem && sidebarNav && navIndicator.value.parentElement) {
-      // 获取滚动容器和激活项的位置
       const navItemRect = activeNavItem.getBoundingClientRect();
       const sidebarNavRect = sidebarNav.getBoundingClientRect();
 
-      // 计算相对于滚动容器的位置（考虑滚动偏移）
       const top =
         navItemRect.top - sidebarNavRect.top + sidebarNav.scrollTop + (navItemRect.height - 16) / 2;
 
-      // 确保导航指示器可见
       navIndicator.value.style.display = "block";
 
-      // 强制触发重排，确保动画能够正确执行
       void navIndicator.value.offsetHeight;
 
-      // 使用 requestAnimationFrame 确保动画在正确的时机执行
       requestAnimationFrame(() => {
         navIndicator.value!.style.top = `${top}px`;
       });
@@ -306,7 +185,6 @@ function startIndicatorSyncDuringSidebarTransition() {
   }, 360);
 }
 
-// 监听侧边栏折叠状态变化，更新指示器位置
 watch(
   () => ui.sidebarCollapsed,
   () => {
@@ -315,7 +193,6 @@ watch(
   },
 );
 
-// 监听路由变化，更新指示器位置
 watch(
   () => route.path,
   () => {
@@ -365,11 +242,9 @@ watch(
   },
 );
 
-// 监听窗口尺寸变化，更新选项位置
 onMounted(() => {
   window.addEventListener("resize", updateNavIndicator);
 
-  // 监听侧边栏滚动，更新指示器位置
   const sidebarNav = document.querySelector(".sidebar-nav");
   if (sidebarNav) {
     sidebarNav.addEventListener("scroll", updateNavIndicator);
@@ -388,7 +263,6 @@ onUnmounted(() => {
 
   window.removeEventListener("resize", updateNavIndicator);
 
-  // 移除侧边栏滚动监听
   const sidebarNav = document.querySelector(".sidebar-nav");
   if (sidebarNav) {
     sidebarNav.removeEventListener("scroll", updateNavIndicator);
@@ -410,11 +284,6 @@ const orderedNavGroups = computed<NavGroup[]>(() => {
   let currentGroup: NavGroup | null = null;
 
   for (const item of navItems.value) {
-    if (item.group === "plugins-custom") {
-      groups.push({ group: "plugins-custom", items: [item] });
-      currentGroup = null;
-      continue;
-    }
     if (!currentGroup || currentGroup.group !== item.group) {
       currentGroup = { group: item.group, items: [] };
       groups.push(currentGroup);
@@ -425,7 +294,6 @@ const orderedNavGroups = computed<NavGroup[]>(() => {
   return groups;
 });
 
-// 彩蛋
 function getAppName() {
   const now = new Date();
   if (now.getMonth() == 3 && now.getDate() == 1) {
@@ -433,8 +301,6 @@ function getAppName() {
   }
   return i18n.t("common.app_name");
 }
-
-// 图标已按需导入，模板中直接使用组件标签替代映射表
 </script>
 
 <template>
@@ -468,88 +334,31 @@ function getAppName() {
         class="server-selector"
       />
 
-      <!-- 按顺序渲染 -->
       <template v-for="(group, gi) in orderedNavGroups" :key="gi">
         <div v-if="group.group !== 'server' || serverOptions.length > 0" class="nav-group">
-          <div v-if="group.group === 'plugins-custom'" class="nav-group-label">
-            <transition name="fade">
-              <span v-if="!ui.sidebarCollapsed">{{
-                group.items[0]?.pluginName || group.items[0]?.label
-              }}</span>
-            </transition>
-          </div>
-          <div v-else-if="group.group === 'plugins-default'" class="nav-group-label">
-            <transition name="fade">
-              <span v-if="!ui.sidebarCollapsed">{{ i18n.t("common.plugins") }}</span>
-            </transition>
-          </div>
-          <div v-else-if="group.group !== 'main'" class="nav-group-label"></div>
-
-          <div>
-            <div v-for="item in group.items" :key="item.name">
-              <div
-                class="nav-item"
-                :class="{ active: isActive(item.path) }"
-                @click="navigateTo(item.path)"
-                :title="ui.sidebarCollapsed ? item.label : ''"
-              >
-                <img
-                  v-if="item.pluginIcon"
-                  :src="item.pluginIcon"
-                  class="nav-icon nav-plugin-icon"
-                  :alt="item.label"
-                  width="20"
-                  height="20"
-                />
-                <component
-                  v-else
-                  :is="getNavIcon(item.icon)"
-                  class="nav-icon"
-                  :size="20"
-                  :stroke-width="1.8"
-                />
-                <transition name="fade">
-                  <span v-if="!ui.sidebarCollapsed" class="nav-label">
-                    {{ item.labelKey ? i18n.t(item.labelKey) : item.label }}
-                  </span>
-                </transition>
-              </div>
-              <!-- 子项 -->
-              <div v-if="item.children?.length" class="nav-children">
-                <div
-                  v-for="child in item.children"
-                  :key="child.name"
-                  class="nav-item nav-child-item"
-                  :class="{ active: isActive(child.path) }"
-                  @click="navigateTo(child.path)"
-                  :title="ui.sidebarCollapsed ? child.label : ''"
-                >
-                  <img
-                    v-if="child.pluginIcon"
-                    :src="child.pluginIcon"
-                    class="nav-icon nav-plugin-icon"
-                    :alt="child.label"
-                    width="16"
-                    height="16"
-                  />
-                  <component
-                    v-else
-                    :is="getNavIcon(child.icon || 'blocks')"
-                    class="nav-icon"
-                    :size="16"
-                    :stroke-width="1.8"
-                  />
-                  <transition name="fade">
-                    <span v-if="!ui.sidebarCollapsed" class="nav-label">{{ child.label }}</span>
-                  </transition>
-                </div>
-              </div>
+          <div v-for="item in group.items" :key="item.name">
+            <div
+              class="nav-item"
+              :class="{ active: isActive(item.path) }"
+              @click="navigateTo(item.path)"
+              :title="ui.sidebarCollapsed ? item.label : ''"
+            >
+              <component
+                :is="getNavIcon(item.icon)"
+                class="nav-icon"
+                :size="20"
+                :stroke-width="1.8"
+              />
+              <transition name="fade">
+                <span v-if="!ui.sidebarCollapsed" class="nav-label">
+                  {{ item.labelKey ? i18n.t(item.labelKey) : item.label }}
+                </span>
+              </transition>
             </div>
           </div>
         </div>
       </template>
 
-      <!-- 关于按钮 -->
       <div class="nav-group lower-side">
         <div
           class="nav-item"

@@ -4,8 +4,6 @@ export * from "@components/common";
 
 export * from "@components/layout";
 
-export * from "@components/plugin";
-
 export type { TabBarItem } from "@components/common/SLTabBar.vue";
 
 import {
